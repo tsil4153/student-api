@@ -23,7 +23,30 @@ function readDatabaseUrl(): string {
   return databaseUrl;
 }
 
+function readRequired(key: string): string {
+  const value = process.env[key];
+
+  if (value === undefined || value.trim() === "") {
+    throw new Error(`${key} is required`);
+  }
+
+  return value;
+}
+
+function readAuth() {
+  const adminUsername = readRequired("ADMIN_USERNAME");
+  const adminPassword = readRequired("ADMIN_PASSWORD");
+  const jwtSecret = readRequired("JWT_SECRET");
+
+  if (jwtSecret.length < 32) {
+    throw new Error("JWT_SECRET must be at least 32 characters");
+  }
+
+  return { adminUsername, adminPassword, jwtSecret };
+}
+
 export const config = {
   port: readPort(),
   databaseUrl: readDatabaseUrl(),
+  auth: readAuth(),
 };
