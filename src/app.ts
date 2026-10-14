@@ -1,14 +1,16 @@
 import express from "express";
+import type { AuthConfig } from "./config";
 import { pool } from "./db/pool";
 import { asyncHandler } from "./middleware/asyncHandler";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
-import { studentRouter } from "./students/student.routes";
+import { jsonBody } from "./middleware/jsonBody";
+import { createAuthRouter } from "./auth/auth.routes";
+import { createStudentRouter } from "./students/student.routes";
 
-export function createApp() {
+export function createApp({ auth }: { auth: AuthConfig }) {
   const app = express();
 
   app.disable("x-powered-by");
-  app.use(express.json({ limit: "1mb" }));
 
   app.get(
     "/health",
@@ -18,7 +20,8 @@ export function createApp() {
     }),
   );
 
-  app.use("/students", studentRouter);
+  app.use("/auth", createAuthRouter(auth));
+  app.use("/students", createStudentRouter(auth));
   app.use(notFoundHandler);
   app.use(errorHandler);
 

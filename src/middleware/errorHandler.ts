@@ -12,6 +12,14 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
+  if (isMalformedJson(error)) {
+    res.status(400).json({
+      error: "Validation failed",
+      details: { formErrors: ["Invalid JSON"], fieldErrors: {} },
+    });
+    return;
+  }
+
   if (error instanceof ZodError) {
     res.status(400).json({
       error: "Validation failed",
@@ -30,4 +38,12 @@ export function errorHandler(
 
   console.error(error);
   res.status(500).json({ error: "Internal server error" });
+}
+
+function isMalformedJson(error: unknown): boolean {
+  return (
+    error instanceof SyntaxError &&
+    "type" in error &&
+    error.type === "entity.parse.failed"
+  );
 }

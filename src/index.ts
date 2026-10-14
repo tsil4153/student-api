@@ -21,7 +21,7 @@ async function main(): Promise<void> {
     throw error;
   }
 
-  const app = createApp();
+  const app = createApp({ auth: config.auth });
   const server = app.listen(config.port, () => {
     console.log(`Student API listening on http://localhost:${config.port}`);
   });
